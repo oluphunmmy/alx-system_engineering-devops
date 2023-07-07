@@ -14,7 +14,7 @@ frontend http_frontend
    redirect scheme https code 301 if ! { ssl_fc }
 
 frontend https_frontend
-   bind *:443 ssl crt /etc/haproxy/certs/combined.pem
+   bind *:443 ssl crt /etc/haproxy/certs/add.pem
    mode http
    default_backend my_backend
 
