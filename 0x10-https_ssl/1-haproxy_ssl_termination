@@ -1,0 +1,25 @@
+global
+   tune.ssl.default-dh-param 2048
+
+defaults
+   mode http
+   timeout client 10s
+   timeout connect 5s
+   timeout server 10s
+   timeout http-request 10s
+
+frontend http_frontend
+   bind *:80
+   mode http
+   redirect scheme https code 301 if ! { ssl_fc }
+
+frontend https_frontend
+   bind *:443 ssl crt /etc/haproxy/certs/add.pem
+   mode http
+   default_backend my_backend
+
+backend my_backend
+   balance roundrobin
+   mode http
+   server 218488-web-01	54.152.176.94 check
+   server 218488-web-02 100.26.133.229 check
