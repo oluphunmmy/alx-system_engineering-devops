@@ -2,7 +2,7 @@ global
         log /dev/log    local0
         log /dev/log    local1 notice
         chroot /var/lib/haproxy
-        stats socket /run/haproxy/admin.sock mode 660 level admin expose-fd listeners
+        stats socket /run/haproxy/admin.sock mode 660 level admin
         stats timeout 30s
         user haproxy
         group haproxy
@@ -20,6 +20,7 @@ global
 defaults
         log     global
         mode    http
+        option forwardfor
         option  httplog
         option  dontlognull
         timeout connect 5000
@@ -33,19 +34,16 @@ defaults
         errorfile 503 /etc/haproxy/errors/503.http
         errorfile 504 /etc/haproxy/errors/504.http
 
-frontend  funmesther-frontend
+frontend 218488-web
         bind *:80
-        mode http
-        bind *:443 ssl crt /etc/haproxy/certs/www.funmesther.tech.pem
-	redirect scheme https if !{ ssl_fc }
-        default_backend funmesther-backend
-backend funmesther-backend
-        balance roundrobin
-        server 218488-web-01 54.152.176.94 check
-        server 218488-web-02 100.26.133.229 check
+        bind *:443 ssl crt /etc/ssl/www.funmesther.tech/www.funmesther.tech.pem
 
-listen http-in
-        bind :80
+        # Redirect if HTTPS is not used
+        redirect scheme https code 301 if !{ ssl_fc }
+
+        default_backend 218715-web_servers
+
+backend 218488-web_servers
         balance roundrobin
-        server 218488-web-01 54.152.176.94 check
-        server 218488-web-02 100.26.133.229 check
+        server web-01 54.152.176.94:80 check
+        server web-02 100.26.133.229:80 check
