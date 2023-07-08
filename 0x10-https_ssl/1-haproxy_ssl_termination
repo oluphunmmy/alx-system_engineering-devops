@@ -36,7 +36,7 @@ defaults
 
 frontend 218488-web
         bind *:80
-        bind *:443 ssl crt /etc/ssl/www.funmesther.tech/www.funmesther.tech.pem
+        bind *:443 ssl crt /etc/ssl/www.funmesther.tech/extention.pem
 
         # Redirect if HTTPS is not used
         redirect scheme https code 301 if !{ ssl_fc }
