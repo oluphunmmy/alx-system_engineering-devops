@@ -1,27 +1,43 @@
 #!/usr/bin/python3
-""" Program that uses Reddit API, query How many subs are there and  returns a list containing the titles of all hot articles for a given subreddit"""
+"""Queries the Reddit API and
+prints the titles of the first
+10 hot posts listed for a given
+subreddit.
+"""
 import requests
 
 
-def recurse(subreddit, hot_list=[], after=''):
-    """ ecursive function that queries the Reddit API and returns a list
-    containing the titles of all hot articles for a given subreddit"""
-    # me.json is a modhash token to prevent CSRF
-    url_hot = 'https://www.reddit.com/r/{}/hot.json?after={}'.format(
-        subreddit, after)
-    h = {'User-Agent': 'My User Agent'}
-    req = requests.get(url_hot, headers=h, allow_redirects=False)
+def top_ten(subreddit):
+    """Prints the titles of the first
+    10 hot posts listed for a given
+    subreddit.
+    """
+    # Set the Default URL strings
+    base_url = 'https://www.reddit.com'
+    api_uri = '{base}/r/{subreddit}/hot.json'.format(base=base_url,
+                                                     subreddit=subreddit)
 
-    if (req.status_code == 200):
-        req_json = req.json()
-        data_list = req_json['data']['children']
-        for i in data_list:
-            hot_list.append(i['data']['title'])
-        after = req_json['data']['after']
-        if (after is not None):
-            recurse(subreddit, hot_list, after)
-        else:
-            return (hot_list)
+    # Set an User-Agent
+    user_agent = {'User-Agent': 'Python/requests'}
+
+    # Set the Query Strings to Request
+    payload = {'limit': '10'}
+
+    # Get the Response of the Reddit API
+    res = requests.get(api_uri, headers=user_agent,
+                       params=payload, allow_redirects=False)
+
+    # Checks if the subreddit is invalid
+    if res.status_code in [302, 404]:
+        print('None')
     else:
-        return (None)
-    return (hot_list)
+        res_json = res.json()
+
+        if res_json.get('data') and res_json.get('data').get('children'):
+            # Get the 10 hot posts of the subreddit
+            hot_posts = res_json.get('data').get('children')
+
+            # Print each hot post title
+            for post in hot_posts:
+                if post.get('data') and post.get('data').get('title'):
+                    print(post.get('data').get('title'))

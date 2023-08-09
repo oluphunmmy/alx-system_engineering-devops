@@ -1,23 +1,42 @@
 #!/usr/bin/python3
-""" Program that use Reddit API,  queries how many subs are there  and lists the
-top ten"""
+"""Queries the Reddit API and
+prints the titles of the first
+10 hot posts listed for a given
+subreddit.
+"""
 import requests
 
-
 def top_ten(subreddit):
-    """ function that queries the Reddit API and prints the titles of the first
-    10 hot posts listed for a given subreddit"""
-    # me.json is a modhash token to prevent CSRF
-    url_hot = 'https://www.reddit.com/r/{}/hot.json'.format(subreddit)
-    h = {'User-Agent': 'My User Agent'}
-    req = requests.get(url_hot, headers=h, allow_redirects=False,
-                       params={'limit': 10})
+    """Prints the titles of the first
+    10 hot posts listed for a given
+    subreddit.
+    """
+    # Set the Default URL strings
+    base_url = 'https://www.reddit.com'
+    api_uri = '{base}/r/{subreddit}/hot.json'.format(base=base_url,
+                                                     subreddit=subreddit)
 
-    if (req.status_code == 200):
-        req_json = req.json()
-        list_hot = req_json['data']['children']
-        for i in range(len(list_hot)):
-            title = list_hot[i]['data']['title']
-            print(title)
+    # Set an User-Agent
+    user_agent = {'User-Agent': 'Python/requests'}
+
+    # Set the Query Strings to Request
+    payload = {'limit': '10'}
+
+    # Get the Response of the Reddit API
+    res = requests.get(api_uri, headers=user_agent,
+                       params=payload, allow_redirects=False)
+
+    # Checks if the subreddit is invalid
+    if res.status_code in [302, 404]:
+        print('None')
     else:
-        print("None")
+        res_json = res.json()
+
+        if res_json.get('data') and res_json.get('data').get('children'):
+            # Get the 10 hot posts of the subreddit
+            hot_posts = res_json.get('data').get('children')
+
+            # Print each hot post title
+            for post in hot_posts:
+                if post.get('data') and post.get('data').get('title'):
+                    print(post.get('data').get('title'))
