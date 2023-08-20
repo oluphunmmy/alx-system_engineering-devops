@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Find the process IDs (PIDs) of Gunicorn workers
+
+worker_pids=$(pgrep gunicorn)
+
+# Gracefully restart each worker
+for pid in $worker_pids; do
+    kill -HUP "$pid"
+done
